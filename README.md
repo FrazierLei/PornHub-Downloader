@@ -8,11 +8,11 @@
 
 P站视频的信息包含在视频页面 HTML 中定义的一个 `flashvars` 开头的变量中：
 
-![image-20210130200458541](/Users/leizongfei/Library/Application Support/typora-user-images/image-20210130200458541.png)
+![](./images/flashvars.png)
 
 下载链接包含在这个`videoUrl`中：
 
-![image-20210130200545371](/Users/leizongfei/Library/Application Support/typora-user-images/image-20210130200545371.png)
+![](./images/videoUrl.png)
 
 
 
