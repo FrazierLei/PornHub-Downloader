@@ -41,7 +41,7 @@ P站视频的信息包含在视频页面 HTML 中定义的一个 `flashvars` 开
 2. 运行脚本
 
    ```shell
-   $ python pornhub_downloader.py -u https://cn.pornhub.com/view_video.php?viewkey=xxxxxxxxxx -s './学习资料'
+   $ python pornhub_downloader.py -u 'https://cn.pornhub.com/view_video.php?viewkey=xxxxxxxxxx' -s './学习资料'
    ```
 
    - -u: 指定你感兴趣的学习资料页面
