@@ -10,8 +10,13 @@ from selenium.webdriver.chrome.options import Options
 
 
 def download_from_url(url, save_path):
-    response = requests.get(url, stream=True) 
-    file_size = int(response.headers['content-length']) 
+    proxies = {
+        'http': 'http://127.0.0.1:7890',
+        'https': 'http://127.0.0.1:7890',
+    }
+
+    resp = requests.get(url, stream=True, proxies=proxies) 
+    file_size = int(resp.headers['content-length']) 
     if os.path.exists(save_path):
         first_byte = os.path.getsize(save_path) 
     else:
@@ -22,9 +27,9 @@ def download_from_url(url, save_path):
     pbar = tqdm(
         total=file_size, initial=first_byte,
         unit='B', unit_scale=True, desc=save_path)
-    req = requests.get(url, headers=header, stream=True) 
+    resp = requests.get(url, headers=header, stream=True, proxies=proxies) 
     with(open(save_path, 'ab')) as f:
-        for chunk in req.iter_content(chunk_size=1024): 
+        for chunk in resp.iter_content(chunk_size=1024): 
             if chunk:
                 f.write(chunk)
                 pbar.update(1024)
@@ -75,7 +80,7 @@ def pornhub_downloader(driver, url, save_path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-u", "--url", help="The video's website url")
-    parser.add_argument("-s", "--save_path", help="The save path on your PC", default='./Download')
+    parser.add_argument("-s", "--save_path", help="The save path on your PC", default='./Downloads/PornHub')
     args = parser.parse_args()
 
     # 创建 Download 文件夹📁
@@ -85,4 +90,19 @@ if __name__ == '__main__':
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless')
     driver = webdriver.Chrome(options=chrome_options)
-    pornhub_downloader(driver, args.url, args.save_path)
+
+    # 下载该 model 的全部视频
+    if 'model' in args.url:
+        resp = requests.get(args.url)
+        bs = BeautifulSoup(resp.text, 'html.parser')
+        name = bs.find('h1', itemprop="name").text.strip()
+        video_urls = list(set([a['href'] for a in bs.find('ul', id='mostRecentVideosSection').find_all('a')]))
+        print(f'开始下载{name}的视频，共{len(video_urls)}个。')
+        
+        for i, url in enumerate(video_urls):
+            print(f'{i}.', end=' ')
+            url = 'https://cn.pornhub.com' + url
+            pornhub_downloader(driver, url, args.save_path)
+    # 下载单个视频
+    else:
+        pornhub_downloader(driver, args.url, args.save_path)        
