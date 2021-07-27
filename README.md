@@ -16,7 +16,7 @@
 
 ## 更简单无脑的方法
 
-如果只是临时用一下，完全不用想这样大费周章，可以用 IDM 这样现成的插件，或者更厉害的 CoCoCut。
+如果只是临时用一下，完全不用像这样大费周章，可以用 IDM 这样现成的插件，或者更厉害的 CoCoCut。
 
 <img src="./images/cococut.png" alt="image-20210727114139974" style="zoom:50%;" />
 
@@ -37,16 +37,29 @@
 这些依赖在 MacOS 和 Linux 下安装非常方便，基本都是一行代码就安装好了，Windows 下会稍微麻烦一点，不过也就多废几分钟功夫。
 
 - Python 3.6+
-
 - requests: 用于下载视频
-
 - bs4: 用于解析 HTML
-
-- ffmpy3: 用于下载并合并视频片段
-
+- FFmpeg 和 ffmpy3: 用于下载并合并视频片段
 - Node.js : 用于运行那一小段 JS 代码
+- 代理软件，我用的是 [ClashX](https://github.com/yichengchen/clashX/releases)
 
-  
+脚本中设置了代理软件用到的通信端口：
+
+```python
+os.environ["http_proxy"] = "http://127.0.0.1:7890"
+os.environ["https_proxy"] = "http://127.0.0.1:7890" 
+```
+
+也可以在执行 Python 脚本的终端中进行设置：
+
+```shell
+export http_proxy=http://127.0.0.1:7890
+export https_proxy=http://127.0.0.1:7890
+```
+
+二者的效果是一样的。
+
+
 
 ## 原理
 
