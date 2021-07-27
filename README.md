@@ -1,6 +1,12 @@
 # PornHub-Downloader
 
-基于 `Selenium`  的PornHub视频下载工具，效率一般，用于练手。
+基于 `Requests` 和 `FFmpeg`  的 PornHub 视频下载工具，支持多任务并行下载。
+
+
+
+## 基于 Selenium 的下载方法
+
+参见 [Selenium 分支](https://github.com/FrazierLei/PornHub-Downloader/tree/selenium)
 
 
 
@@ -20,50 +26,49 @@
 
 ![hongkongdoll](./images/hongkongdoll.png)
 
+
+
+## 环境需求
+
+- Python 3.6+
+
+- requests: 用于下载视频
+
+- bs4: 用于解析HTML
+
+- ffmpy3: 用于下载并合并视频片段
+
+  
+
 ## 原理
 
 P站视频的信息包含在视频页面 HTML 中定义的一个 `flashvars` 开头的变量中：
 
 <img src="./images/flashvars.png" style="zoom:50%;" />
 
-下载链接包含在这个`videoUrl`中：
+下载链接包含在这个 `videoUrl`中：
 
 ![](./images/videoUrl.png)
 
 
 
-### 为什么会用到 Selenium？ 
-
-因为我菜。
-
-打开 `videoUrl` 需要一个名为 `bs` 的 cookie，但是我闹了半天也没解决，非常奇怪。
-
-如果有能帮忙解决的大佬希望能在 issue 中指出，非常感谢！
-
-
-
-## 环境需求
-
-- Python 3.6+
-- tqdm: 用于显示下载进度条
-- requests: 用于下载视频
-- bs4: 用于解析HTML
-- selenium: 用于控制虚拟浏览器
+如果不利用 `Selenium`，无法得到真实的 mp4 文件的下载地址，但是可以得到包含众多 ts 格式的视频片段地址的 m3u8 文件。这时我们只需要用 `FFmpeg` 把这些 ts 文件下载下来，并合并为 mp4 文件即可。
 
 
 
 ## 使用方法
 
-1. 下载和本地 Chrome 版本对应的 [chromedriver](https://chromedriver.chromium.org/)，放置在环境变量的路径中或者在脚本中指定路径
+1. 在环境中安装包括 `FFmpeg` 在内的众多依赖
 
 2. 运行脚本
 
    ```shell
-   $ python pornhub_downloader.py 'https://cn.pornhub.com/view_video.php?viewkey=xxxxxxxxxx' -s './学习资料'
+   $ python pornhub_downloader.py 'https://cn.pornhub.com/view_video.php?viewkey=xxxxxxxxxx' -s './学习资料' -n 2
    ```
 
-   - url: 指定你感兴趣的学习资料页面或者指定up主的主页
+   - url: 指定你感兴趣的学习资料页面或者指定 model 的主页
    - -s: 视频保存的路径，若省略，则在当前路径下的 Download 文件夹（若不存在则自动新建）
+   - -n: 同时下载的进程数，默认为1
 
 
 
@@ -71,12 +76,10 @@ P站视频的信息包含在视频页面 HTML 中定义的一个 `flashvars` 开
 
 支持断点续传，如果连接断开，重新运行即可。
 
-![](./images/run.png)
-
-
+![](./images/run2.png)
 
 ## TODO
 
-- [ ] 去掉对 `Selenium` 的依赖
-- [ ] 支持多任务并行下载
+- [x] 去掉对 `Selenium` 的依赖
+- [x] 支持多任务并行下载
 - [ ] 调用其他下载软件（如迅雷）进行下载
