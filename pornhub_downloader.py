@@ -2,7 +2,6 @@ import os
 import re
 import json
 import argparse
-from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 import ffmpy3
@@ -10,15 +9,28 @@ from multiprocessing.dummy import Pool as ThreadPool
 
 
 def ffmpeg_downloader(url, save_path):
-    ffmpy3.FFmpeg(inputs={url: None}, outputs={save_path:None}).run()
+    """
+    用 ffmpeg 下载并保存
+    :param url: m3u8 文件的地址
+    :param save_path: 视频保存的位置
+    :return: None
+    """
+    ffmpy3.FFmpeg(inputs={url: None}, outputs={save_path: None}).run()
+
 
 def pornhub_parser(sess, url):
+    """
+    解析得到指定 url 的视频对应的 m3u8 文件的地址
+    :param sess: 会话
+    :param url: 视频或者 model 主页的 url
+    :return: (tuple) (m3u8 文件的地址, 视频文件名)
+    """
     resp = sess.get(url)
     bs = BeautifulSoup(resp.text, 'html.parser')
 
     # 解析得到视频名称
     video_name = bs.find('span', class_="inlineFree").text
-    script = bs.find('div',class_='original mainPlayerDiv').find('script').string
+    script = bs.find('div', class_='original mainPlayerDiv').find('script').string
     script = script.strip('\n').strip('\t')
 
     # 用正则表达式提取 flashvars 变量名
@@ -80,7 +92,7 @@ if __name__ == '__main__':
         if args.url.endswith('videos'):
             url = args.url
         else:
-            url = urljoin(args.url+'/', 'videos')
+            url = args.url + '/videos'
 
         resp = requests.get(url)
         bs = BeautifulSoup(resp.text, 'html.parser')
@@ -109,4 +121,3 @@ if __name__ == '__main__':
         download_url, video_name = pornhub_parser(sess, args.url)
         save_path = os.path.join(args.save_path, video_name) 
         ffmpeg_downloader(download_url, save_path)
-       
