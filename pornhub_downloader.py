@@ -3,18 +3,14 @@ import re
 import json
 from tqdm import tqdm # 显示下载进度条
 import argparse
+from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 
-def download_from_url(url, save_path):
-    proxies = {
-        'http': 'http://127.0.0.1:7890',
-        'https': 'http://127.0.0.1:7890',
-    }
-
+def download_from_url(url, save_path, proxies=None):
     resp = requests.get(url, stream=True, proxies=proxies) 
     file_size = int(resp.headers['content-length']) 
     if os.path.exists(save_path):
@@ -37,7 +33,7 @@ def download_from_url(url, save_path):
     return file_size
 
 
-def pornhub_downloader(driver, url, save_path):
+def pornhub_downloader(driver, url, save_path, proxies):
     driver.get(url)
     bs = BeautifulSoup(driver.page_source, 'html.parser')
 
@@ -75,13 +71,19 @@ def pornhub_downloader(driver, url, save_path):
 
     # 下载
     print(f"分辨率{data[-1]['quality']}P的下载地址为：{download_url}")
-    download_from_url(download_url, os.path.join(save_path, data[-1]['quality']+'P'+'_'+video_name+'.mp4'))
+    download_from_url(download_url, os.path.join(save_path, data[-1]['quality']+'P'+'_'+video_name+'.mp4'), proxies)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-u", "--url", help="The video's website url")
-    parser.add_argument("-s", "--save_path", help="The save path on your PC", default='./Downloads/PornHub')
+    parser.add_argument("url", type=str, help="The video's website url")
+    parser.add_argument("-s", "--save_path", help="The save path on your PC", default='./Downloads')
     args = parser.parse_args()
+
+    # 目前从真实地址下载不需要代理，但是下载速度会受到限制
+    proxies = {
+        'http': 'http://127.0.0.1:7890',
+        'https': 'http://127.0.0.1:7890',
+    }
 
     # 创建 Download 文件夹📁
     os.makedirs(args.save_path, exist_ok=True)
@@ -93,16 +95,21 @@ if __name__ == '__main__':
 
     # 下载该 model 的全部视频
     if 'model' in args.url:
-        resp = requests.get(args.url)
+        if not args.url.endswith('videos'):
+            url = urljoin(args.url+'/', 'videos')
+        resp = requests.get(url)
         bs = BeautifulSoup(resp.text, 'html.parser')
         name = bs.find('h1', itemprop="name").text.strip()
         video_urls = list(set([a['href'] for a in bs.find('ul', id='mostRecentVideosSection').find_all('a')]))
-        print(f'开始下载{name}的视频，共{len(video_urls)}个。')
+        print(f'开始下载 {name} 的视频，共 {len(video_urls)} 个。')
         
         for i, url in enumerate(video_urls):
             print(f'{i}.', end=' ')
             url = 'https://cn.pornhub.com' + url
-            pornhub_downloader(driver, url, args.save_path)
+            save_path = os.path.join(args.save_path, name)
+            os.makedirs(save_path, exist_ok=True)
+            pornhub_downloader(driver, url, save_path, proxies)
+    
     # 下载单个视频
     else:
-        pornhub_downloader(driver, args.url, args.save_path)        
+        pornhub_downloader(driver, args.url, args.save_path, proxies)        
