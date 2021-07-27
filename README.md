@@ -2,17 +2,21 @@
 
 基于 `Requests` 和 `FFmpeg`  的 PornHub 视频下载工具，支持多任务并行下载。
 
+用于练手的一个小脚本，一共 100 行出头的代码。
+
+初衷是看妹子，但是 coding 的过程中学到很多东西。
+
 
 
 ## 基于 Selenium 的下载方法
 
-参见 [Selenium 分支](https://github.com/FrazierLei/PornHub-Downloader/tree/selenium)
+一开始的版本，用到了 `Selenium`，参见 [Selenium 分支](https://github.com/FrazierLei/PornHub-Downloader/tree/selenium)
 
 
 
 ## 更简单无脑的方法
 
-可以用 IDM 这样现成的插件，或者更厉害的 CoCoCut。
+如果只是临时用一下，完全不用想这样大费周章，可以用 IDM 这样现成的插件，或者更厉害的 CoCoCut。
 
 <img src="./images/cococut.png" alt="image-20210727114139974" style="zoom:50%;" />
 
@@ -30,13 +34,17 @@
 
 ## 环境需求
 
+这些依赖在 MacOS 和 Linux 下安装非常方便，基本都是一行代码就安装好了，Windows 下会稍微麻烦一点，不过也就多废几分钟功夫。
+
 - Python 3.6+
 
 - requests: 用于下载视频
 
-- bs4: 用于解析HTML
+- bs4: 用于解析 HTML
 
 - ffmpy3: 用于下载并合并视频片段
+
+- Node.js : 用于运行那一小段 JS 代码
 
   
 
@@ -82,4 +90,4 @@ P站视频的信息包含在视频页面 HTML 中定义的一个 `flashvars` 开
 
 - [x] 去掉对 `Selenium` 的依赖
 - [x] 支持多任务并行下载
-- [ ] 调用其他下载软件（如迅雷）进行下载
+- [ ] GUI
