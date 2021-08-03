@@ -97,10 +97,13 @@ if __name__ == '__main__':
     if 'model' in args.url:
         if not args.url.endswith('videos'):
             url = urljoin(args.url+'/', 'videos')
+        else:
+            url = args.url
         resp = requests.get(url)
         bs = BeautifulSoup(resp.text, 'html.parser')
         name = bs.find('h1', itemprop="name").text.strip()
-        video_urls = list(set([a['href'] for a in bs.find('ul', id='mostRecentVideosSection').find_all('a')]))
+        video_urls = [a['href'] for a in bs.find('ul', id='mostRecentVideosSection').find_all('a')]
+        video_urls = sorted(set(video_urls),key=video_urls.index)
         print(f'开始下载 {name} 的视频，共 {len(video_urls)} 个。')
         
         for i, url in enumerate(video_urls):
