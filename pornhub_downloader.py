@@ -3,7 +3,6 @@ import re
 import json
 from tqdm import tqdm # 显示下载进度条
 import argparse
-from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -95,15 +94,15 @@ if __name__ == '__main__':
 
     # 下载该 model 的全部视频
     if 'model' in args.url:
-        if not args.url.endswith('videos'):
-            url = urljoin(args.url+'/', 'videos')
-        else:
+        if args.url.endswith('videos'):
             url = args.url
+        else:
+            url = args.url + '/videos'
         resp = requests.get(url)
         bs = BeautifulSoup(resp.text, 'html.parser')
         name = bs.find('h1', itemprop="name").text.strip()
         video_urls = [a['href'] for a in bs.find('ul', id='mostRecentVideosSection').find_all('a')]
-        video_urls = sorted(set(video_urls),key=video_urls.index)
+        video_urls = sorted(set(video_urls), key=video_urls.index)
         print(f'开始下载 {name} 的视频，共 {len(video_urls)} 个。')
         
         for i, url in enumerate(video_urls):
