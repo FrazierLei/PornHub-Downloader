@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
     # 下载该 model 的全部视频
     if 'model' in args.url:
-        # 如果主页连接没有包涵 videos，就加上
+        # 如果主页连接没有包含 videos，就加上
         if args.url.endswith('videos'):
             url = args.url
         else:
@@ -97,7 +97,8 @@ if __name__ == '__main__':
         resp = requests.get(url)
         bs = BeautifulSoup(resp.text, 'html.parser')
         name = bs.find('h1', itemprop="name").text.strip()
-        video_urls = list(set([a['href'] for a in bs.find('ul', id='mostRecentVideosSection').find_all('a')]))
+        video_urls = [a['href'] for a in bs.find('ul', id='mostRecentVideosSection').find_all('a')]
+        video_urls = sorted(set(video_urls), key=video_urls.index)
         print(f'开始下载 {name} 的视频，共 {len(video_urls)} 个。')
         
         model_urls = []

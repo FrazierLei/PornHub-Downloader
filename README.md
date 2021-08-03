@@ -14,6 +14,8 @@
 
 一开始的版本，用到了 `Selenium`，参见 [Selenium 分支](https://github.com/FrazierLei/PornHub-Downloader/tree/selenium)
 
+经测试，main 分支（当前分支）下的方法下载更加稳定，速度也更快，但是 `FFmpeg` 的下载/合并比较烧 CPU，风扇转的飞起，所以还是放在服务器上运行比较安全。
+
 
 
 ## 更简单无脑的方法
