@@ -6,7 +6,6 @@ import argparse
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 
 
 def download_from_url(url, save_path, proxies=None):
@@ -38,7 +37,7 @@ def pornhub_downloader(driver, url, save_path, proxies):
 
     # 解析得到视频名称
     video_name = bs.find('span', class_="inlineFree").text
-    script = bs.find('div',class_='original mainPlayerDiv').find('script').string
+    script = bs.find('div', class_='original mainPlayerDiv').find('script').string
     script = script.strip('\n').strip('\t')
 
     # 用正则表达式提取 flashvars 变量名
@@ -66,11 +65,16 @@ def pornhub_downloader(driver, url, save_path, proxies):
     data = json.loads(bs.text)
 
     # 选择最高清的版本
-    download_url = data[-1]['videoUrl']
+    i = -1
+    download_url = data[i]['videoUrl']
+    while not download_url:
+        i -= 1
+        download_url = data[i]['videoUrl']
 
     # 下载
     print(f"分辨率{data[-1]['quality']}P的下载地址为：{download_url}")
     download_from_url(download_url, os.path.join(save_path, data[-1]['quality']+'P'+'_'+video_name+'.mp4'), proxies)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -106,7 +110,7 @@ if __name__ == '__main__':
         print(f'开始下载 {name} 的视频，共 {len(video_urls)} 个。')
         
         for i, url in enumerate(video_urls):
-            print(f'{i}.', end=' ')
+            print(f'{i + 1}.', end=' ')
             url = 'https://cn.pornhub.com' + url
             save_path = os.path.join(args.save_path, name)
             os.makedirs(save_path, exist_ok=True)
