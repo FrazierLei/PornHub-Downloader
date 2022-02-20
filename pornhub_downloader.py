@@ -80,35 +80,37 @@ async def get_single_video(save_path, url, sem):
 async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("url", type=str, help="The video's website url")
-    parser.add_argument("-s", "--save_path", help="The save path on your PC", default='./Downloads')
-    parser.add_argument("-n", "--num_proc", type=int, help="The number of processes", default='1')
+    parser.add_argument("-s", "--save-path", help="The save path on your PC", default='./Downloads')
+    parser.add_argument("-n", "--num-proc", type=int, help="The number of semaphore", default=5)
     args = parser.parse_args()
 
     global browser
-    browser = await launch()
-    sem = asyncio.Semaphore(5)
+    browser = await launch(headless=True)
+    sem = asyncio.Semaphore(args.num_proc)
+    try:
+        if 'model' in args.url:   # 下载该 model 的全部视频
+            if args.url.endswith('videos'):
+                url = args.url
+            else:
+                url = args.url + '/videos'
 
-    if 'model' in args.url:   # 下载该 model 的全部视频
-        if args.url.endswith('videos'):
-            url = args.url
-        else:
-            url = args.url + '/videos'
+            resp = requests.get(url)
+            bs = BeautifulSoup(resp.text, 'html.parser')
+            name = bs.find('h1', itemprop="name").text.strip()
+            urls = ['https://cn.pornhub.com' + a['href'] for a in bs.find('ul', id='mostRecentVideosSection').find_all('a')]
+            urls = sorted(set(urls), key=urls.index)
+            print(f'开始下载 {name} 的视频，共 {len(urls)} 个')
+            save_path = os.path.join(args.save_path, name)
+            os.makedirs(save_path, exist_ok=True)
 
-        resp = requests.get(url)
-        bs = BeautifulSoup(resp.text, 'html.parser')
-        name = bs.find('h1', itemprop="name").text.strip()
-        urls = ['https://cn.pornhub.com' + a['href'] for a in bs.find('ul', id='mostRecentVideosSection').find_all('a')]
-        urls = sorted(set(urls), key=urls.index)
-        print(f'开始下载 {name} 的视频，共 {len(urls)} 个。')
-        save_path = os.path.join(args.save_path, name)
-        os.makedirs(save_path, exist_ok=True)
-
-        tasks = [asyncio.create_task(get_single_video(save_path, url, sem)) for url in urls]
-        await asyncio.wait(tasks)
-    else:  # 下载单个视频
-        await get_single_video(args.save_path, args.url, sem)
-    await browser.close()
+            tasks = [asyncio.create_task(get_single_video(save_path, url, sem)) for url in urls]
+            await asyncio.wait(tasks)
+        else:  # 下载单个视频
+            await get_single_video(args.save_path, args.url, sem)
+    finally:
+        await browser.close()
 
 
 if __name__ == '__main__':
     asyncio.run(main())
+    # asyncio.get_event_loop().run_until_complete(main())
